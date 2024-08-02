@@ -5,7 +5,7 @@ on:
     branches:
       - develop
       - staging
-      - prod
+      - main
 
 jobs:
   deploy:
@@ -40,7 +40,7 @@ jobs:
         with:
           cluster_name: "cluster-sbx"
           location: "us-central1-c"
-          
+
       - name: Set up kubectl context
         run: kubectl config set-context --current --namespace=$NAMESPACE
 
