@@ -39,7 +39,7 @@ jobs:
         run: echo "NAMESPACE=staging" >> $GITHUB_ENV
 
       - name: Set environment variable for PROD
-        if: github.ref == 'refs/heads/prod'
+        if: github.ref == 'refs/heads/main'
         run: echo "NAMESPACE=production" >> $GITHUB_ENV
 
       - name: Create namespace if not exists
