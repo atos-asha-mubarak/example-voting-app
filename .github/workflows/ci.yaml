@@ -1,0 +1,66 @@
+name: Deploy to GKE
+
+on:
+  push:
+    branches:
+      - develop
+      - staging
+      - prod
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # - name: Set up Cloud SDK
+      #   uses: google-github-actions/setup-gcloud@v1
+      #   with:
+      #     project_id: ${{ secrets.GCP_PROJECT_ID }}
+      #     service_account_key: ${{ secrets.GCP_SA_KEY }}
+      #     export_default_credentials: true
+
+      # - name: Configure kubectl
+      #   run: |
+      #     gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --zone ${{ secrets.GKE_ZONE }}
+
+
+      - name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v1"
+        with:
+          credentials_json: ${{ secrets.MY_SA_TOKEN }}
+          access_token_lifetime: "300s"
+      - name: "Authenticate to GKE cluster"
+        uses: "google-github-actions/get-gke-credentials@v2"
+        with:
+          cluster_name: "cluster-sbx"
+          location: "us-central1-c"
+          
+      - name: Set up kubectl context
+        run: kubectl config set-context --current --namespace=$NAMESPACE
+
+      - name: Deploy to DEV
+        if: github.ref == 'refs/heads/develop'
+        env:
+          NAMESPACE: dev
+        run: |
+          kubectl apply -f k8s-specifications/
+
+      - name: Deploy to STAGING
+        if: github.ref == 'refs/heads/staging'
+        env:
+          NAMESPACE: staging
+        run: |
+          kubectl apply -f k8s-specifications/
+
+      - name: Deploy to PROD
+        if: github.ref == 'refs/heads/main'
+        env:
+          NAMESPACE: production
+        run: |
+          kubectl apply -f k8s-specifications/
