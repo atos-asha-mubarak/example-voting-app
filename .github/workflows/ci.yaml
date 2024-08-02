@@ -63,7 +63,7 @@ jobs:
           kubectl apply -f k8s-specifications/
 
       - name: Deploy to PROD
-        if: github.ref == 'refs/heads/prod'
+        if: github.ref == 'refs/heads/main'
         env:
           NAMESPACE: production
         run: |
