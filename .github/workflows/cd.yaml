@@ -1,14 +1,86 @@
+# name: App Deployment
+
+# on:
+#   push:
+#     branches:
+#       - dev
+#       - qa
+#       - main
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     permissions:
+#       contents: read
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+
+#       - name: "Authenticate to Google Cloud"
+#         uses: "google-github-actions/auth@v1"
+#         with:
+#           credentials_json: ${{ secrets.MY_SA_TOKEN }}
+#           access_token_lifetime: "300s"
+
+#       - name: "Authenticate to GKE cluster"
+#         uses: "google-github-actions/get-gke-credentials@v2"
+#         with:
+#           cluster_name: "cluster-sbx"
+#           location: "us-central1-c"
+
+#       - name: Set environment variable for DEV
+#         if: github.ref == 'refs/heads/dev'
+#         run: echo "NAMESPACE=dev" >> $GITHUB_ENV
+
+#       - name: Set environment variable for qa
+#         if: github.ref == 'refs/heads/qa'
+#         run: echo "NAMESPACE=qa" >> $GITHUB_ENV
+
+#       - name: Set environment variable for PROD
+#         if: github.ref == 'refs/heads/main'
+#         run: echo "NAMESPACE=production" >> $GITHUB_ENV
+
+#       - name: Create namespace if not exists
+#         run: kubectl create namespace $NAMESPACE || true
+
+#       - name: Set up kubectl context
+#         run: kubectl config set-context --current --namespace=$NAMESPACE
+
+#       - name: Deploy to DEV
+#         if: github.ref == 'refs/heads/dev'
+#         env:
+#           NAMESPACE: dev
+#         run: |
+#           kubectl apply -f k8s-specifications/
+
+#       - name: Deploy to qa
+#         if: github.ref == 'refs/heads/qa'
+#         env:
+#           NAMESPACE: qa
+#         run: |
+#           kubectl apply -f k8s-specifications/
+
+#       - name: Deploy to PROD
+#         if: github.ref == 'refs/heads/main'
+#         env:
+#           NAMESPACE: production
+#         run: |
+#           kubectl apply -f k8s-specifications/
+
+
 name: App Deployment
 
 on:
   push:
     branches:
-      - develop
-      - staging
+      - dev
+      - qa
       - main
 
 jobs:
-  deploy:
+  authenticate:
     runs-on: ubuntu-latest
 
     permissions:
@@ -19,28 +91,30 @@ jobs:
         uses: actions/checkout@v2
 
       - name: "Authenticate to Google Cloud"
+        id: auth
         uses: "google-github-actions/auth@v1"
         with:
           credentials_json: ${{ secrets.MY_SA_TOKEN }}
           access_token_lifetime: "300s"
 
       - name: "Authenticate to GKE cluster"
+        id: gke
         uses: "google-github-actions/get-gke-credentials@v2"
         with:
           cluster_name: "cluster-sbx"
           location: "us-central1-c"
 
+  deploy_dev:
+    runs-on: ubuntu-latest
+    needs: authenticate
+    if: github.ref == 'refs/heads/dev'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
       - name: Set environment variable for DEV
-        if: github.ref == 'refs/heads/develop'
         run: echo "NAMESPACE=dev" >> $GITHUB_ENV
-
-      - name: Set environment variable for STAGING
-        if: github.ref == 'refs/heads/staging'
-        run: echo "NAMESPACE=staging" >> $GITHUB_ENV
-
-      - name: Set environment variable for PROD
-        if: github.ref == 'refs/heads/main'
-        run: echo "NAMESPACE=production" >> $GITHUB_ENV
 
       - name: Create namespace if not exists
         run: kubectl create namespace $NAMESPACE || true
@@ -49,22 +123,49 @@ jobs:
         run: kubectl config set-context --current --namespace=$NAMESPACE
 
       - name: Deploy to DEV
-        if: github.ref == 'refs/heads/develop'
-        env:
-          NAMESPACE: dev
         run: |
           kubectl apply -f k8s-specifications/
 
-      - name: Deploy to STAGING
-        if: github.ref == 'refs/heads/staging'
-        env:
-          NAMESPACE: staging
+  deploy_qa:
+    runs-on: ubuntu-latest
+    needs: [authenticate, deploy_dev]
+    if: github.ref == 'refs/heads/qa'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set environment variable for QA
+        run: echo "NAMESPACE=qa" >> $GITHUB_ENV
+
+      - name: Create namespace if not exists
+        run: kubectl create namespace $NAMESPACE || true
+
+      - name: Set up kubectl context
+        run: kubectl config set-context --current --namespace=$NAMESPACE
+
+      - name: Deploy to QA
         run: |
           kubectl apply -f k8s-specifications/
+
+  deploy_prod:
+    runs-on: ubuntu-latest
+    needs: [authenticate, deploy_qa]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set environment variable for PROD
+        run: echo "NAMESPACE=production" >> $GITHUB_ENV
+
+      - name: Create namespace if not exists
+        run: kubectl create namespace $NAMESPACE || true
+
+      - name: Set up kubectl context
+        run: kubectl config set-context --current --namespace=$NAMESPACE
 
       - name: Deploy to PROD
-        if: github.ref == 'refs/heads/main'
-        env:
-          NAMESPACE: production
         run: |
           kubectl apply -f k8s-specifications/

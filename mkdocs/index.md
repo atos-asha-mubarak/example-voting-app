@@ -1,7 +1,39 @@
 # Senario 1
 
 1. Discuss & justify potential deployment options in terms of infrastructure for development environment of above application 
-deployment to K8S
+
+## Potential Deployment Options for Development Environment
+There are two potential deployment options for the development environment in terms of a DevOps automated approach:
+
+### Single Pipeline with Multiple Jobs:
+
+This approach involves having one pipeline consisting of multiple jobs that handle the deployment to different environments.
+
+### Multiple Workflow Files:
+
+This approach involves having separate workflow files, each dedicated to handling the deployment to a specific environment.
+
+### Recommended Approach
+My recommended approach is to use a single workflow file that handles multiple development environments where the code is built, tested, and deployed, and the artifact is then promoted to the next environment, eventually to be deployed into production.
+
+### Justification:
+
+Simplicity: This is a simple application without much complexity, and a single workflow file is sufficient to manage multiple environments.
+Efficiency: Having one workflow file reduces the complexity of managing multiple workflows and makes it easier to maintain.
+State and Environment Management: When an artifact flows from one environment to another, the state and environment values between the deployment environments can be passed easily, maintain consistency by promoting identical artifacts across DEV, STAGING, and PROD environments.
+
+
+
+### 2. Demonstrate example infrastructure set-up and application deployment model (CD)
+
+### Deployment model 
+The following diagram represent the my reccomanded deployment approch for the application 
+
+![alt text](image.png)
+
+#### Practical Implementation
+
+
 2. Demonstrate example infrastructure set-up and application deployment model (CD)
 
 In terms of development enviorntment, we can have two development environtment which are Dev and testing. these two env can be handle by github by two differnt env and the actuact deployment of dev environtment from the main branch in dev 
