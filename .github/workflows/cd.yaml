@@ -81,6 +81,7 @@ on:
 env:
   # # Setting an environment variable 
   cluster_name: ${{ vars.CLUSTER_NAME }}
+  cluster_location: ${{ vars.LOCATION }}
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -101,7 +102,7 @@ jobs:
         uses: "google-github-actions/get-gke-credentials@v2"
         with:
           cluster_name: $cluster_name
-          location: ${{ env.LOCATION }}
+          location: $cluster_location
 
       - name: Set environments
         run: |
