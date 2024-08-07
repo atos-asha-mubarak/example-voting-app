@@ -78,10 +78,10 @@ on:
       - dev
       - staging
       - main
-env:
-  # # Setting an environment variable 
-  cluster_name: ${{ vars.CLUSTER_NAME }}
-  cluster_location: ${{ vars.LOCATION }}
+# env:
+#   # # Setting an environment variable 
+#   cluster_name: ${{ vars.CLUSTER_NAME }}
+#   cluster_location: ${{ vars.LOCATION }}
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -99,10 +99,12 @@ jobs:
           access_token_lifetime: "300s"
 
       - name: "Authenticate to GKE cluster"
-        uses: "google-github-actions/get-gke-credentials@v2"
+         # Get the GKE credentials so we can deploy to the cluster
+        uses: google-github-actions/get-gke-credentials@db150f2cc60d1716e61922b832eae71d2a45938f
         with:
-          cluster_name: $cluster_name
-          location: $cluster_location
+          cluster_name: ${{ env.CLUSTER_NAME }}
+          location: ${{ env.LOCATION }}
+          credentials: ${{ secrets.MY_SA_TOKEN }}
 
       - name: Set environments
         run: |
