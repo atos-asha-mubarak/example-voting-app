@@ -78,7 +78,9 @@ on:
       - dev
       - staging
       - main
-
+env:
+  # # Setting an environment variable 
+  cluster_name: ${{ vars.CLUSTER_NAME }}
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -98,7 +100,7 @@ jobs:
       - name: "Authenticate to GKE cluster"
         uses: "google-github-actions/get-gke-credentials@v2"
         with:
-          cluster_name: ${{ env.CLUSTER_NAME }}
+          cluster_name: $cluster_name
           location: ${{ env.LOCATION }}
 
       - name: Set environments
