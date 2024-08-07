@@ -4,7 +4,7 @@
 #   push:
 #     branches:
 #       - dev
-#       - qa
+#       - staging
 #       - main
 
 # jobs:
@@ -34,9 +34,9 @@
 #         if: github.ref == 'refs/heads/dev'
 #         run: echo "NAMESPACE=dev" >> $GITHUB_ENV
 
-#       - name: Set environment variable for qa
-#         if: github.ref == 'refs/heads/qa'
-#         run: echo "NAMESPACE=qa" >> $GITHUB_ENV
+#       - name: Set environment variable for staging
+#         if: github.ref == 'refs/heads/staging'
+#         run: echo "NAMESPACE=staging" >> $GITHUB_ENV
 
 #       - name: Set environment variable for PROD
 #         if: github.ref == 'refs/heads/main'
@@ -55,10 +55,10 @@
 #         run: |
 #           kubectl apply -f k8s-specifications/
 
-#       - name: Deploy to qa
-#         if: github.ref == 'refs/heads/qa'
+#       - name: Deploy to staging
+#         if: github.ref == 'refs/heads/staging'
 #         env:
-#           NAMESPACE: qa
+#           NAMESPACE: staging
 #         run: |
 #           kubectl apply -f k8s-specifications/
 
@@ -76,7 +76,7 @@ on:
   push:
     branches:
       - dev
-      - qa
+      - staging
       - main
 
 jobs:
@@ -98,15 +98,15 @@ jobs:
       - name: "Authenticate to GKE cluster"
         uses: "google-github-actions/get-gke-credentials@v2"
         with:
-          cluster_name: "cluster-sbx"
-          location: "us-central1-c"
+          cluster_name: ${{ env.CLUSTER_NAME }}
+          location: ${{ env.LOCATION }}
 
-      - name: Set environment variables
+      - name: Set environments
         run: |
           if [[ ${{ github.ref }} == 'refs/heads/dev' ]]; then
             echo "NAMESPACE=dev" >> $GITHUB_ENV
-          elif [[ ${{ github.ref }} == 'refs/heads/qa' ]]; then
-            echo "NAMESPACE=qa" >> $GITHUB_ENV
+          elif [[ ${{ github.ref }} == 'refs/heads/staging' ]]; then
+            echo "NAMESPACE=staging" >> $GITHUB_ENV
           elif [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
             echo "NAMESPACE=production" >> $GITHUB_ENV
           fi
@@ -117,15 +117,6 @@ jobs:
       - name: Set up kubectl context
         run: kubectl config set-context --current --namespace=${{ env.NAMESPACE }}
 
-      - name: Verify kubectl context
-        run: |
-          kubectl config view --minify | grep namespace:
-          echo "Current namespace: $(kubectl config view --minify --output 'jsonpath={..namespace}')"
-
       - name: Deploy to environment
         run: |
           kubectl apply -f k8s-specifications/
-
-      - name: Post-deployment checks
-        run: |
-          kubectl get pods -n ${{ env.NAMESPACE }}
