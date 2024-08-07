@@ -102,7 +102,7 @@ jobs:
         uses: "google-github-actions/get-gke-credentials@v2"
         with:
           cluster_name: $cluster_name
-          location: $cluster_location
+          locations: $cluster_location
 
       - name: Set environments
         run: |
