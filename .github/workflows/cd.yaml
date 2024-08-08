@@ -25,7 +25,7 @@ jobs:
         with:
           cluster_name: "cluster-sbx"
           location: "us-central1-c"
-          
+
       - name: Verify kubectl context
         run: kubectl config current-context
   deploy-staging:
@@ -37,8 +37,8 @@ jobs:
         run: |
           if [[ ${{ github.ref }} == 'refs/heads/staging' ]]; then
             echo "NAMESPACE=staging" >> $GITHUB_ENV
-          elif [[ ${{ github.ref }} == 'refs/heads/dev' ]]; then
-            echo "NAMESPACE=dev" >> $GITHUB_ENV
+          elif [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
+            echo "NAMESPACE=production" >> $GITHUB_ENV
           fi
 
       - name: Create namespace if not exists
@@ -48,7 +48,10 @@ jobs:
         run: kubectl config set-context --current --namespace=${{ env.NAMESPACE }}
 
       - name: Deploy to environment
-        run: kubectl apply -f k8s-specifications/
+        run: |
+          if [[ ${{ github.ref }} == 'refs/heads/staging' ]]; then
+            kubectl apply -f k8s-specifications/
+          fi
 
   deploy-production:
     runs-on: ubuntu-latest
@@ -65,4 +68,7 @@ jobs:
         run: kubectl config set-context --current --namespace=${{ env.NAMESPACE }}
 
       - name: Deploy to environment
-        run: kubectl apply -f k8s-specifications/
+        run: |
+            if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
+              kubectl apply -f k8s-specifications/
+            fi
