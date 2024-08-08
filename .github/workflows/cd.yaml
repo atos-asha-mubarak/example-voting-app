@@ -1,120 +1,14 @@
-# name: App Deployment
-
-# on:
-#   push:
-#     branches:
-#       - staging
-#       - main
-
-# jobs:
-#   auth:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v2
-
-#       - name: "Authenticate to Google Cloud"
-#         id: auth
-#         uses: "google-github-actions/auth@v1"
-#         with:
-#           credentials_json: ${{ secrets.MY_SA_TOKEN }}
-#           access_token_lifetime: "300s"
-
-#       - name: "Authenticate to GKE cluster"
-#         uses: "google-github-actions/get-gke-credentials@v2"
-#         with:
-#           cluster_name: "cluster-sbx"
-#           location: "us-central1-c"
-
-#       # - name: Verify kubectl context
-#       #   run: kubectl config current-context
-
-#   deploy-staging:
-#     runs-on: ubuntu-latest
-#     needs: auth
-#     if: github.ref == 'refs/heads/staging'
-#     steps:
-#       - name: Set namespace to staging
-#         run: echo "NAMESPACE=staging" >> $GITHUB_ENV
-
-#       - name: Create Kubernetes namespace
-#         run: kubectl create namespace ${{ env.NAMESPACE }}
-
-#       - name: "Authenticate to GKE cluster"
-#         uses: "google-github-actions/get-gke-credentials@v2"
-#         with:
-#           cluster_name: "cluster-sbx"
-#           location: "us-central1-c"
-
-#       - name: Deploy to environment
-#         run: kubectl apply -f k8s-specifications/
-
-
-
-#   deploy-production:
-#     runs-on: ubuntu-latest
-#     needs: [auth, deploy-staging]
-#     if: github.ref == 'refs/heads/main'
-#     steps:
-#       - name: Set environments
-#         run: echo "NAMESPACE=production" >> $GITHUB_ENV
-
-#       - name: Create namespace if not exists
-#         run: kubectl create namespace ${{ env.NAMESPACE }} || true
-
-#       - name: Set up kubectl context
-#         run: kubectl config set-context --current --namespace=${{ env.NAMESPACE }}
-
-#       - name: Deploy to environment
-#         run: |
-#             if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
-#               kubectl apply -f k8s-specifications/
-#             fi
-
 
 name: App Deployment
 
 on:
   push:
     branches:
-      - dev
       - staging
       - main
 
 jobs:
-  deploy-dev:
-    name: Deploy to Dev
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/dev'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{ secrets.MY_SA_TOKEN }}
-          access_token_lifetime: "300s"
-
-      - name: Authenticate to GKE cluster
-        uses: google-github-actions/get-gke-credentials@v2
-        with:
-          cluster_name: "cluster-sbx"
-          location: "us-central1-c"
-
-      - name: Set environment variable
-        run: echo "NAMESPACE=dev" >> $GITHUB_ENV
-
-      - name: Create namespace if not exists
-        run: kubectl create namespace ${{ env.NAMESPACE }} || true
-
-      - name: Set up kubectl context
-        run: kubectl config set-context --current --namespace=${{ env.NAMESPACE }}
-
-      - name: Deploy to Dev environment
-        run: kubectl apply -f k8s-specifications/
-
+  
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
@@ -152,6 +46,7 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    needs: deploy-staging
 
     steps:
       - name: Checkout code
