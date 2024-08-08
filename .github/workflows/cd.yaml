@@ -1,24 +1,20 @@
-
 name: App Deployment
 
 on:
   push:
     branches:
-      - dev
       - staging
       - main
 
 jobs:
-  deploy:
+  setup:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: "Authenticate to Google Cloud"
+        id: auth
         uses: "google-github-actions/auth@v1"
         with:
           credentials_json: ${{ secrets.MY_SA_TOKEN }}
@@ -30,16 +26,13 @@ jobs:
           cluster_name: "cluster-sbx"
           location: "us-central1-c"
 
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: setup
+    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/staging'
+    steps:
       - name: Set environments
-        run: |
-          if [[ ${{ github.ref }} == 'refs/heads/dev' ]]; then
-            echo "NAMESPACE=dev" >> $GITHUB_ENV
-          elif [[ ${{ github.ref }} == 'refs/heads/staging' ]]; then
-            echo "NAMESPACE=staging" >> $GITHUB_ENV
-          elif [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
-            echo "NAMESPACE=production" >> $GITHUB_ENV
-          fi  
-
+        run: echo "NAMESPACE=staging" >> $GITHUB_ENV
 
       - name: Create namespace if not exists
         run: kubectl create namespace ${{ env.NAMESPACE }} || true
@@ -48,9 +41,22 @@ jobs:
         run: kubectl config set-context --current --namespace=${{ env.NAMESPACE }}
 
       - name: Deploy to environment
-        run: |
-          if [[ ${{ github.ref }} == 'refs/heads/dev' || ${{ github.ref }} == 'refs/heads/staging' ]]; then
-            kubectl apply -f k8s-specifications/
-          elif [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
-            kubectl apply -f k8s-specifications/
-          fi
+        run: kubectl apply -f k8s-specifications/
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: [setup, deploy-staging]
+    if: github.ref == 'refs/heads/main'
+  
+    steps:
+      - name: Set environments
+        run: echo "NAMESPACE=production" >> $GITHUB_ENV
+
+      - name: Create namespace if not exists
+        run: kubectl create namespace ${{ env.NAMESPACE }} || true
+
+      - name: Set up kubectl context
+        run: kubectl config set-context --current --namespace=${{ env.NAMESPACE }}
+
+      - name: Deploy to environment
+        run: kubectl apply -f k8s-specifications/
