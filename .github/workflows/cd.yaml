@@ -78,6 +78,7 @@ on:
       - dev
       - staging
       - main
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -108,7 +109,6 @@ jobs:
             echo "NAMESPACE=staging" >> $GITHUB_ENV
           elif [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
             echo "NAMESPACE=production" >> $GITHUB_ENV
-          fi
 
       - name: Create namespace if not exists
         run: kubectl create namespace ${{ env.NAMESPACE }} || true
@@ -118,4 +118,8 @@ jobs:
 
       - name: Deploy to environment
         run: |
-          kubectl apply -f k8s-specifications/
+          if [[ ${{ github.ref }} == 'refs/heads/dev' || ${{ github.ref }} == 'refs/heads/staging' ]]; then
+            kubectl apply -f k8s-specifications/
+          elif [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
+            kubectl apply -f k8s-specifications/
+          fi
