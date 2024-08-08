@@ -26,9 +26,6 @@ jobs:
           cluster_name: "cluster-sbx"
           location: "us-central1-c"
 
-      - name: Print kubeconfig
-        run: cat $HOME/.kube/config
-
       - name: Verify kubectl context
         run: kubectl config current-context
 
@@ -40,7 +37,7 @@ jobs:
       - name: Set environments
         run: |
           if [[ ${{ github.ref }} == 'refs/heads/staging' ]]; then
-            echo "NAMESPACE=staging" >> $GITHUB_ENV
+            echo "NAMESPACE=STAGING" >> $GITHUB_ENV
           elif [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
             echo "NAMESPACE=production" >> $GITHUB_ENV
           fi
