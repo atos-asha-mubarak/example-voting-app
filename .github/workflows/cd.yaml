@@ -40,8 +40,11 @@ jobs:
       - name: Create Kubernetes namespace
         run: kubectl create namespace ${{ env.NAMESPACE }}
 
-      - name: Set up kubectl context
-        run: kubectl config set-context --current
+      - name: "Authenticate to GKE cluster"
+        uses: "google-github-actions/get-gke-credentials@v2"
+        with:
+          cluster_name: "cluster-sbx"
+          location: "us-central1-c"
 
       - name: Deploy to environment
         run: kubectl apply -f k8s-specifications/
