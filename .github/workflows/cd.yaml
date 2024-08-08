@@ -25,7 +25,9 @@ jobs:
         with:
           cluster_name: "cluster-sbx"
           location: "us-central1-c"
-
+          
+      - name: Verify kubectl context
+        run: kubectl config current-context
   deploy-staging:
     runs-on: ubuntu-latest
     needs: auth
