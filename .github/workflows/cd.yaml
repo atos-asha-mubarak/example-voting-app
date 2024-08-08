@@ -41,13 +41,13 @@ jobs:
         run: kubectl create namespace ${{ env.NAMESPACE }}
 
       - name: Set up kubectl context
-        run: kubectl config set-context --current --namespace=${{ env.NAMESPACE }}
+        run: kubectl config set-context --current
 
       - name: Deploy to environment
         run: kubectl apply -f k8s-specifications/
 
 
-        
+
   deploy-production:
     runs-on: ubuntu-latest
     needs: [auth, deploy-staging]
