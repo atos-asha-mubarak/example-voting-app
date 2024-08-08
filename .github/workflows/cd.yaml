@@ -26,27 +26,28 @@ jobs:
           cluster_name: "cluster-sbx"
           location: "us-central1-c"
 
-      - name: Verify kubectl context
-        run: kubectl config current-context
+      # - name: Verify kubectl context
+      #   run: kubectl config current-context
 
   deploy-staging:
     runs-on: ubuntu-latest
     needs: auth
-    if: github.ref == 'refs/heads/staging' 
+    if: github.ref == 'refs/heads/staging'
     steps:
-       
-      - name: Set namespace to GitHub environment name
+      - name: Set namespace to staging
         run: echo "NAMESPACE=staging" >> $GITHUB_ENV
 
       - name: Create Kubernetes namespace
         run: kubectl create namespace ${{ env.NAMESPACE }}
-        
+
       - name: Set up kubectl context
-        run: kubectl config set-context --current --namespace=${{ env.NAMESPACE }}  
+        run: kubectl config set-context --current --namespace=${{ env.NAMESPACE }}
 
       - name: Deploy to environment
-        run: |
-          kubectl apply -f k8s-specifications/
+        run: kubectl apply -f k8s-specifications/
+
+
+        
   deploy-production:
     runs-on: ubuntu-latest
     needs: [auth, deploy-staging]
