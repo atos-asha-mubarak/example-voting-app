@@ -37,7 +37,7 @@ jobs:
       - name: Set environments
         run: |
           if [[ ${{ github.ref }} == 'refs/heads/staging' ]]; then
-            echo "NAMESPACE=STAGING" >> $GITHUB_ENV
+            echo "NAMESPACE=staging" >> $GITHUB_ENV
           elif [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
             echo "NAMESPACE=production" >> $GITHUB_ENV
           fi
@@ -45,12 +45,13 @@ jobs:
       - name: Create namespace if not exists
         run: kubectl create namespace ${{ env.NAMESPACE }} || true
 
-      - name: Set up kubectl context
-        run: kubectl config set-context --current --namespace=${{ env.NAMESPACE }}
+      # - name: Set up kubectl context
+      #   run: kubectl config set-context --current --namespace=${{ env.NAMESPACE }}
 
       - name: Deploy to environment
         run: |
           if [[ ${{ github.ref }} == 'refs/heads/staging' ]]; then
+            kubectl config set-context --current --namespace=${{ env.NAMESPACE }}
             kubectl apply -f k8s-specifications/
           fi
 
