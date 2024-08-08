@@ -34,27 +34,17 @@ jobs:
     needs: auth
     if: github.ref == 'refs/heads/staging' 
     steps:
-      - name: Set environments
-        run: |
-          if [[ ${{ github.ref }} == 'refs/heads/staging' ]]; then
-            echo "NAMESPACE=staging" >> $GITHUB_ENV
-          elif [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
-            echo "NAMESPACE=production" >> $GITHUB_ENV
-          fi
+       
+      - name: Set namespace to GitHub environment name
+        run: echo "NAMESPACE=staging" >> $GITHUB_ENV
 
-      - name: Create namespace if not exists
-        run: kubectl create namespace ${{ env.NAMESPACE }} || true
-
-      # - name: Set up kubectl context
-      #   run: kubectl config set-context --current --namespace=${{ env.NAMESPACE }}
+      - name: Create Kubernetes namespace
+        run: kubectl create namespace ${{ env.NAMESPACE }}
 
       - name: Deploy to environment
         run: |
-          if [[ ${{ github.ref }} == 'refs/heads/staging' ]]; then
-            kubectl config set-context --current --namespace=${{ env.NAMESPACE }}
-            kubectl apply -f k8s-specifications/
-          fi
-
+          kubectl config set-context --current --namespace=${{ env.NAMESPACE }}
+          kubectl apply -f k8s-specifications/
   deploy-production:
     runs-on: ubuntu-latest
     needs: [auth, deploy-staging]
