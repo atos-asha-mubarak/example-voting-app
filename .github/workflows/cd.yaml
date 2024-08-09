@@ -65,6 +65,9 @@ jobs:
       - name: Set environment variable
         run: echo "NAMESPACE=production" >> $GITHUB_ENV
 
+      - name: Create namespace if not exists
+        run: kubectl create namespace ${{ env.NAMESPACE }} || true
+        
       - name: Set up kubectl context
         run: kubectl config set-context --current --namespace=${{ env.NAMESPACE }}
 
