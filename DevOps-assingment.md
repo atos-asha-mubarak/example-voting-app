@@ -1,4 +1,4 @@
-# Scenario 2 - production set-up: 
+# Scenario 2 - production set-up
 Discuss and justify below points: 
 
 ## 1. Recommendation as for the application environments (how many and why?) 
@@ -10,16 +10,17 @@ For the production setup, I recommend a minimum of two environments: the Product
 By the branching strategy and environment setup in GitHub. The automated CI/CD pipeline that can deploy the application to the corresponding environment based on the dedicated branch. 
 #### Branching Strategy
 To efficiently manage app deployment and ensure proper code promotion through various environments, the following branching strategy is recommended in the production setup:
-* Staging Branch
-- Purpose: This branch closely mirrors the production environment. It is used for final testing before deployment to ensure everything works as expected in a production setting.
-* Main Branch
-- Purpose: This branch is used for production-ready code. Merging into this branch from the Staging branch initiates deployment to the Production environment.
+
+#### Staging Branch
+ **Purpose:** This branch closely mirrors the production environment. It is used for final testing before deployment to ensure everything works as expected in a production setting.
+#### Main Branch
+**Purpose:** This branch is used for production-ready code. Merging into this branch from the Staging branch initiates deployment to the Production environment.
 
 The following diagram represent the branching strategies. ![branching](branching.png)
 
 The following diagram illustrate the environments and the application deployment model in production setup:![env setup](env-setup.png)
  
- * Note: I have chosen to deploy the application on a Kubernetes cluster. If we opt not to use a cluster, we can have separate instances for each environment. However, within the cluster, I have isolated the two environments by namespace because it is more cost-effective to maintain a single cluster rather than separate clusters for each environment, and it also simplifies maintenance.
+ **Note:** I have chosen to deploy the application on a Kubernetes cluster. If we opt not to use a cluster, we can have separate instances for each environment. However, within the cluster, I have isolated the two environments by namespace because it is more cost-effective to maintain a single cluster rather than separate clusters for each environment, and it also simplifies maintenance.
 
 ## 2. Which tooling will you use for CI/CD and why? 
 
@@ -31,7 +32,7 @@ To ensure no downtime during deployments, I will implement one of the following 
  This deployment strategy updates application instances gradually. By replacing instances one at a time, it minimizes disruption and allows for quick rollback if issues arise.
 * Blue/Green Deployment: this strategy involves running two environment, blue (current) and green (new). Traffic is gradually shifted from the blue to the green environment. However, it can incur additional costs for maintaining two environments simultaneously.
 * Canary Deployment: this approach involves deploying changes to a small subset of users first before a full-scale release. This helps identify and fix issues early while minimizing the impact on all users.
-* Recommendation: 
+**Recommendation:** 
 I recommend using the canary deployment method for production setups over rolling updates and blue/green deployment to ensure zero downtime at minimal cost. Canary deployment allows us to gradually test the new version on a small subset of users. For instance, Route 53 can be configured using weighted policies to redirect a small amount of traffic to another instance. This approach reduces the risk of widespread issues, minimizes resource usage, and avoids the high costs associated with maintaining duplicate environments or handling complex rollbacks. It stands out as the most cost-effective approach for stable, zero-downtime releases.
 
 ## 3	What is the additional tooling you need to supplement the application with to ensure it runs smoothly on production? (e.g. from observability) 
@@ -67,7 +68,7 @@ When the application goes down, it's essential for us to have an alerting system
 ### Prometheus Alertmanager: 
 we can use this Alertmanager to handle alerts, set up alerting rules in Prometheus to detect failures, and ensure Prometheus can communicate with Alertmanager. Once set up, test the configuration by simulating an application failure. This will help us verify that alerts are being sent correctly to the designated channels, such as webhooks, email, Slack, or other notification platforms. By doing so, we can ensure that the alerting system works as expected and provides timely notifications in case of issues.
 ###  AWS:  
-we can use CloudWatch Alarms to monitor various metrics. For example, if an application fails, CloudWatch can send notifications based on predefined metrics. We can configure CloudWatch alarms to trigger and send notifications via SNS (Simple Notification Service). Additionally, we can create a Lambda function that responds to these SNS notifications to automatically remediate the failure, such as restarting services or replacing failed instances or rollbacks etc. The following picture describe how a simple alert system can configure in AWS infrastructure. ![alerting-in-aws](alerting.png)
+In AWS infrastructure setup, we can use CloudWatch Alarms to monitor various metrics. For example, if an application fails, CloudWatch can send notifications based on predefined metrics. We can configure CloudWatch alarms to trigger and send notifications via SNS (Simple Notification Service). Additionally, we can create a Lambda function that responds to these SNS notifications to automatically remediate the failure, such as restarting services or replacing failed instances or rollbacks etc. The following picture describe how a simple alert system can configure in AWS infrastructure. ![alerting-in-aws](alerting.png)
  
 
   
