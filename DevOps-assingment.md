@@ -70,6 +70,10 @@ When the application goes down, it's essential for us to have an alerting system
 we can use this Alertmanager to handle alerts, set up alerting rules in Prometheus to detect failures, and ensure Prometheus can communicate with Alertmanager. Once set up, test the configuration by simulating an application failure. This will help us verify that alerts are being sent correctly to the designated channels, such as webhooks, email, Slack, or other notification platforms. By doing so, we can ensure that the alerting system works as expected and provides timely notifications in case of issues.
 ###  AWS:  
 In AWS infrastructure setup, we can use CloudWatch Alarms to monitor various metrics. For example, if an application fails, CloudWatch can send notifications based on predefined metrics. We can configure CloudWatch alarms to trigger and send notifications via SNS (Simple Notification Service). Additionally, we can create a Lambda function that responds to these SNS notifications to automatically remediate the failure, such as restarting services or replacing failed instances or rollbacks etc. The following picture describe how a simple alert system can configure in AWS infrastructure. ![alerting-in-aws](alerting.png)
+
+## 7. Code
+The code used for demonstrating the Production environment setups and the app deployment can be found at [ci/cd pipeline](https://github.com/atos-asha-mubarak/example-voting-app/blob/main/.github/workflows/cd.yaml)
+
  
 
   

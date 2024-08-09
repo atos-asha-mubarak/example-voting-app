@@ -1,3 +1,5 @@
+   DevOps Challenge document available at [DevOps-assingment](https://github.com/atos-asha-mubarak/example-voting-app/blob/main/DevOps-assingment.md)
+
 # Example Voting App
 
 A simple distributed application running across multiple Docker containers.
