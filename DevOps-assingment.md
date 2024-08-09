@@ -32,19 +32,20 @@ To ensure no downtime during deployments, I will implement one of the following 
  This deployment strategy updates application instances gradually. By replacing instances one at a time, it minimizes disruption and allows for quick rollback if issues arise.
 * Blue/Green Deployment: this strategy involves running two environment, blue (current) and green (new). Traffic is gradually shifted from the blue to the green environment. However, it can incur additional costs for maintaining two environments simultaneously.
 * Canary Deployment: this approach involves deploying changes to a small subset of users first before a full-scale release. This helps identify and fix issues early while minimizing the impact on all users.
+
 **Recommendation:** 
 I recommend using the canary deployment method for production setups over rolling updates and blue/green deployment to ensure zero downtime at minimal cost. Canary deployment allows us to gradually test the new version on a small subset of users. For instance, Route 53 can be configured using weighted policies to redirect a small amount of traffic to another instance. This approach reduces the risk of widespread issues, minimizes resource usage, and avoids the high costs associated with maintaining duplicate environments or handling complex rollbacks. It stands out as the most cost-effective approach for stable, zero-downtime releases.
 
-## 3	What is the additional tooling you need to supplement the application with to ensure it runs smoothly on production? (e.g. from observability) 
+## 3.	What is the additional tooling you need to supplement the application with to ensure it runs smoothly on production? (e.g. from observability) 
 
-### 1.	Prometheus and Grafana monitoring stack:
+**Prometheus and Grafana monitoring stack:**
 For robust monitoring, we can use Prometheus and Grafana together to monitor the application's health in real time and receive alerts in case of any failures. Prometheus can be set up to monitor metrics such as application uptime, while Grafana can be configured to track those metrics and send alerts to notification channels like webhooks, email, Slack, etc. Additionally, we can use AWS Managed Grafana and Prometheus to avoid the operational burden of managing infrastructure resources.
 - To respond to alert notifications and roll back to a previous version, we can use:
   - Automated Rollback:
       Kubernetes: Leverage Kubernetes' built-in rollback capabilities to revert to a previous deployment.
 
 
-### 2.	AWS Monitoring and Observability tools:
+**AWS Monitoring and Observability tools:**
 AWS offers a wide range of AI-powered observability tools. When we deploy an application in the AWS Cloud, we can leverage several built-in monitoring and observability services. For instance, AWS CloudWatch provides us with insights into the performance and operational health of our applications and infrastructure. To ensure smooth operation, we can set up CloudWatch metrics to monitor the application's health. If the application goes down, CloudWatch will trigger an alarm and send a notification via AWS SNS. Additionally, we can configure an AWS Lambda function to automatically roll back to the previous version if needed, ensuring minimal disruption and quicker recovery.
 
 ## 4. Networking & DNS-records management and networking protection rules 
